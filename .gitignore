@@ -1,0 +1,11 @@
+backend/node_modules/
+frontend/node_modules/
+*.log
+.env
+.env.production
+backend/.env*
+frontend/.env*
+dist/
+build/
+/.vscode/
+/.idea/
