@@ -4,11 +4,8 @@ import Editor from './pages/Editor.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Auth from './pages/Auth.jsx';
 import Home from './pages/Home.jsx';
-import Flipbook from './pages/Flipbook.jsx';
 import './App.css';
 import Navbar from './components/Navbar.jsx';
-
- 
 
 function App() {
   return (
@@ -19,7 +16,6 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/editor" element={<Editor />} />
-            <Route path="/flipbook" element={<Flipbook />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/auth" element={<Auth />} />
           </Routes>

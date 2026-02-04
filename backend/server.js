@@ -50,9 +50,10 @@ app.use((err, req, res, next) => {
 
 // MongoDB connection
 const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/pdfwriter';
-mongoose.connect(MONGODB_URI)
-  .then(() => console.log('MongoDB connected'))
-  .catch((err) => console.warn('MongoDB connection failed:', err.message));
+console.log('MongoDB not available, using in-memory storage');
+// mongoose.connect(MONGODB_URI)
+//   .then(() => console.log('MongoDB connected'))
+//   .catch((err) => console.warn('MongoDB connection failed:', err.message));
 
 // Handle app.listen for local development
 if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
