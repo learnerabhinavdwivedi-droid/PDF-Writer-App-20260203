@@ -1,0 +1,9 @@
+.App { min-height: 100vh; display: flex; flex-direction: column; }
+.navbar { background: #111; color: #fff; }
+.navbar-container { max-width: 1024px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; }
+.navbar-logo { color: #fff; text-decoration: none; font-weight: 700; }
+.nav-links { display: flex; gap: 12px; }
+.nav-link { color: #ddd; text-decoration: none; }
+.nav-link:hover { color: #fff; }
+.main-content { flex: 1; }
+.footer { background: #f4f4f4; color: #333; text-align: center; padding: 10px; }

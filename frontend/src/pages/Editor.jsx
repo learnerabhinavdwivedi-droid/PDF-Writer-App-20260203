@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { documentAPI, pdfAPI, templateAPI, convertAPI } from '../services/api';
 import './Editor.css';
 
@@ -8,6 +9,7 @@ function Editor() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const contentRef = useRef(null);
+  const navigate = useNavigate();
 
   const handleGeneratePDF = async () => {
     if (!title || !content) {
@@ -18,15 +20,16 @@ function Editor() {
     setLoading(true);
     try {
       const response = await pdfAPI.textToPDF({ text: content, title });
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const blob = response.data;
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank');
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `${title}.pdf`);
       document.body.appendChild(link);
       link.click();
-      link.parentNode.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      link.parentNode && link.parentNode.removeChild(link);
+      setTimeout(() => window.URL.revokeObjectURL(url), 5000);
 
       setMessage('PDF downloaded successfully!');
     } catch (error) {
@@ -70,8 +73,8 @@ function Editor() {
       const choice = prompt(`Templates available: ${names}\nType a template name to load:`, templates[0].name);
       const selected = templates.find(t => t.name === choice) || templates[0];
       setTitle(selected.name);
-      setContent(selected.content);
-      setMessage('Template loaded');
+      setContent(selected.content || selected.description || selected.name || '');
+      setMessage(selected.description ? `Template loaded: ${selected.description}` : 'Template loaded');
     } catch (err) {
       setMessage('Error loading templates: ' + (err.response?.data?.error || err.message));
     }
@@ -85,14 +88,16 @@ function Editor() {
     setLoading(true);
     try {
       const response = await convertAPI.convert({ title, text: content });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const blob = response.data;
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank');
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `${title}-convert.pdf`);
       document.body.appendChild(link);
       link.click();
-      link.parentNode.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      link.parentNode && link.parentNode.removeChild(link);
+      setTimeout(() => window.URL.revokeObjectURL(url), 5000);
       setMessage('Converted PDF downloaded successfully!');
     } catch (error) {
       setMessage('Error converting: ' + (error.response?.data?.error || error.message));
@@ -100,25 +105,15 @@ function Editor() {
     setLoading(false);
   };
 
-  const wrapSelection = (wrapperStart, wrapperEnd = wrapperStart) => {
-    const el = contentRef.current;
-    if (!el) return;
-    const start = el.selectionStart ?? 0;
-    const end = el.selectionEnd ?? 0;
-    const before = content.slice(0, start);
-    const selected = content.slice(start, end);
-    const after = content.slice(end);
-    const newVal = before + wrapperStart + selected + wrapperEnd + after;
-    setContent(newVal);
-    setTimeout(() => {
-      el.focus();
-      el.selectionStart = start + wrapperStart.length;
-      el.selectionEnd = end + wrapperStart.length;
-    }, 0);
+  const handleViewFlipbook = () => {
+    if (!title || !content) {
+      setMessage('Please fill in all fields');
+      return;
+    }
+    navigate('/flipbook', { state: { title, content } });
   };
 
-  const applyBold = () => wrapSelection('**');
-  const applyItalic = () => wrapSelection('*');
+  // Content is plain text; no formatting helpers
 
   return (
     <div className="editor">
@@ -144,10 +139,7 @@ function Editor() {
 
           <div className="form-group">
             <label>Content</label>
-              <div className="toolbar">
-                <button type="button" className="btn btn-small" onClick={applyBold}><b>B</b></button>
-                <button type="button" className="btn btn-small" onClick={applyItalic}><i>I</i></button>
-              </div>
+              
             <textarea
                 ref={contentRef}
               value={content}
@@ -162,28 +154,35 @@ function Editor() {
             <button
               onClick={handleSaveDocument}
               disabled={loading}
-              className="btn btn-save"
+              className="btn btn-secondary"
             >
               {loading ? 'Saving...' : '💾 Save Document'}
             </button>
             <button
               onClick={handleGeneratePDF}
               disabled={loading}
-              className="btn btn-pdf"
+              className="btn btn-primary"
             >
               {loading ? 'Generating...' : '📥 Generate PDF'}
             </button>
             <button
               onClick={handleConvert}
               disabled={loading}
-              className="btn btn-convert"
+              className="btn"
             >
               🔁 Convert to PDF
             </button>
             <button
+              onClick={handleViewFlipbook}
+              disabled={loading}
+              className="btn btn-flip"
+            >
+              📖 View as Flipbook
+            </button>
+            <button
               onClick={handleUseTemplate}
               disabled={loading}
-              className="btn btn-template"
+              className="btn"
             >
               📚 Use Templates
             </button>

@@ -1,0 +1,10 @@
+.editor { padding: 20px; }
+.editor-header { margin-bottom: 16px; }
+.editor-container { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 16px; }
+.editor-form { flex: 1; }
+.form-group { margin-bottom: 12px; }
+.toolbar { margin: 6px 0 10px; display: flex; gap: 8px; }
+.message { margin-bottom: 10px; color: #24c6a0; }
+.preview { background: linear-gradient(180deg, var(--surface), var(--surface-2)); border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 16px; }
+.preview-title { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+.preview-box { background: var(--surface-2); border-radius: var(--radius-xs); padding: 12px; min-height: 160px; }

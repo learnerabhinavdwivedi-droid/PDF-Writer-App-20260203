@@ -1,0 +1,8 @@
+.auth { padding: 20px; }
+.auth-container { display: flex; justify-content: center; }
+.auth-box { max-width: 440px; width: 100%; background: linear-gradient(180deg, var(--surface), var(--surface-2)); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; }
+.auth-form .form-group { margin-bottom: 12px; }
+.btn-submit { padding: 10px 14px; border-radius: var(--radius-xs); border: none; background: linear-gradient(180deg, var(--primary), var(--primary-700)); color: #fff; }
+.auth-message.success { color: var(--secondary); }
+.auth-message.error { color: var(--danger); }
+.toggle-btn { background: none; border: none; color: var(--primary); cursor: pointer; }

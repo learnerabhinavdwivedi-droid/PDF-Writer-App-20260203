@@ -108,21 +108,43 @@ function parseStyledSegments(text) {
 }
 
 function makeSimplePDF(title, body) {
+  const pageWidth = 612;
+  const pageHeight = 792;
+  const marginLeft = 72;
+  const startY = 720;
+  const titleSize = 20;
+  const subtitleSize = 16;
+  const bodySize = 12;
+  const lineStep = 18;
   const lines = String(body).split(/\r?\n/);
-  let y = 720;
-  let content = 'BT\n';
-  content += '/F1 20 Tf\n72 ' + y + ' Td\n(' + escapePDFString(String(title)) + ') Tj\n';
-  y -= 32;
-  for (const line of lines) {
-    const segs = parseStyledSegments(line);
-    content += '72 ' + y + ' Td\n';
-    for (const seg of segs) {
-      const fontName = seg.font === 'bold' ? '/F2' : seg.font === 'italic' ? '/F3' : '/F1';
-      content += fontName + ' 12 Tf\n(' + escapePDFString(seg.text) + ') Tj\n';
+  const pages = [];
+  let idx = 0;
+  let isFirstPage = true;
+  while (idx <= lines.length) {
+    let y = startY;
+    let content = 'BT\n';
+    if (isFirstPage) {
+      content += '/F1 ' + titleSize + ' Tf\n1 0 0 1 ' + marginLeft + ' ' + y + ' Tm\n(' + escapePDFString(String(title)) + ') Tj\n';
+      y -= 28;
+      const subtitle = lines[0] || '';
+      if (subtitle) {
+        content += '/F1 ' + subtitleSize + ' Tf\n1 0 0 1 ' + marginLeft + ' ' + y + ' Tm\n(' + escapePDFString(subtitle) + ') Tj\n';
+        y -= 24;
+      } else {
+        y -= 4;
+      }
+      isFirstPage = false;
     }
-    y -= 18;
+    while (idx < lines.length && y > 72) {
+      content += '1 0 0 1 ' + marginLeft + ' ' + y + ' Tm\n';
+      content += '/F1 ' + bodySize + ' Tf\n(' + escapePDFString(lines[idx]) + ') Tj\n';
+      y -= lineStep;
+      idx++;
+    }
+    content += 'ET';
+    pages.push(content);
+    if (idx >= lines.length) break;
   }
-  content += 'ET';
   const objects = [];
   let offset = 0;
   const addObj = (str) => {
@@ -133,19 +155,33 @@ function makeSimplePDF(title, body) {
   };
   const header = '%PDF-1.4\n';
   offset = header.length;
-  const obj1 = '1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n';
-  const obj2 = '2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n';
-  const obj3 = '3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 5 0 R /F2 6 0 R /F3 7 0 R >> >> /Contents 4 0 R >>\nendobj\n';
-  const obj4 = `4 0 obj\n<< /Length ${Buffer.byteLength(content)} >>\nstream\n${content}\nendstream\nendobj\n`;
-  const obj5 = '5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n';
-  const obj6 = '6 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\nendobj\n';
-  const obj7 = '7 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique >>\nendobj\n';
-  [obj1, obj2, obj3, obj4, obj5, obj6, obj7].forEach(addObj);
+  const totalPages = pages.length || 1;
+  const fontStart = 3 + totalPages * 2;
+  const font1 = fontStart;
+  const font2 = fontStart + 1;
+  const font3 = fontStart + 2;
+  addObj('1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
+  const kids = [];
+  for (let i = 0; i < totalPages; i++) {
+    const pageNum = 3 + i * 2;
+    kids.push(pageNum + ' 0 R');
+  }
+  addObj('2 0 obj\n<< /Type /Pages /Kids [' + kids.join(' ') + '] /Count ' + totalPages + ' >>\nendobj\n');
+  for (let i = 0; i < totalPages; i++) {
+    const pageNum = 3 + i * 2;
+    const contentNum = pageNum + 1;
+    addObj(pageNum + ' 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + pageWidth + ' ' + pageHeight + '] /Resources << /Font << /F1 ' + font1 + ' 0 R /F2 ' + font2 + ' 0 R /F3 ' + font3 + ' 0 R >> >> /Contents ' + contentNum + ' 0 R >>\nendobj\n');
+    const streamLen = Buffer.byteLength(pages[i] || 'BT\nET', 'utf8');
+    addObj(contentNum + ' 0 obj\n<< /Length ' + streamLen + ' >>\nstream\n' + (pages[i] || 'BT\nET') + '\nendstream\nendobj\n');
+  }
+  addObj(font1 + ' 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n');
+  addObj(font2 + ' 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\nendobj\n');
+  addObj(font3 + ' 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique >>\nendobj\n');
   const xrefStart = offset;
-  const xref = ['xref', '0 8', '0000000000 65535 f ']
+  const xref = ['xref', '0 ' + (objects.length + 1), '0000000000 65535 f ']
     .concat(objects.map(o => String(o.start).padStart(10, '0') + ' 00000 n '))
     .join('\n') + '\n';
-  const trailer = `trailer\n<< /Size 8 /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF\n`;
+  const trailer = `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF\n`;
   const buffers = [Buffer.from(header, 'utf8')].concat(objects.map(o => o.buf)).concat([Buffer.from(xref, 'utf8'), Buffer.from(trailer, 'utf8')]);
   return Buffer.concat(buffers);
 }

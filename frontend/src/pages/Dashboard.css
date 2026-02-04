@@ -1,0 +1,10 @@
+.dashboard { padding: 20px; }
+.dashboard-header { margin-bottom: 16px; }
+.docs-table { width: 100%; border-collapse: collapse; }
+.docs-table th, .docs-table td { border-bottom: 1px solid #2a3140; padding: 10px; }
+.docs-table th { color: var(--muted); font-weight: 600; }
+.docs-table tr:hover { background: #1a1f29; }
+.actions button { margin-right: 6px; }
+.error-message { color: var(--danger); }
+.loading { color: var(--muted); }
+.empty-state { color: var(--muted); }

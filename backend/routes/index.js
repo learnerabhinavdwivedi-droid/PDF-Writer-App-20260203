@@ -8,6 +8,7 @@ try {
   const pdfRoutes = require('./pdf');
   const templateRoutes = require('./templates');
   const convertRoutes = require('./convert');
+  const flipbookRoutes = require('./flipbook');
 
   // Mount routes
   router.use('/auth', authRoutes);
@@ -15,6 +16,7 @@ try {
   router.use('/pdf', pdfRoutes);
   router.use('/templates', templateRoutes);
   router.use('/convert', convertRoutes);
+  router.use('/flipbook', flipbookRoutes);
 } catch (err) {
   console.warn('Some routes could not be loaded:', err.message);
   

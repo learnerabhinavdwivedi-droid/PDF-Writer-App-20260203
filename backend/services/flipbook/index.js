@@ -1,0 +1,87 @@
+const puppeteer = require('puppeteer-core');
+const chromium = require('@sparticuz/chromium');
+const { transformToHTML } = require('../pdf/transformer');
+
+/**
+ * Generates flipbook pages (images) from content.
+ * @param {Object} params - Input parameters
+ * @param {Object|string} params.content - TipTap JSON or HTML content
+ * @param {Object} [params.options] - Styling options
+ * @returns {Promise<string[]>} - Array of base64 image strings
+ */
+async function generateFlipbookPages({ content, options = {} }) {
+  const html = transformToHTML(content, options);
+  
+  // Inject specific styles for flipbook rendering (fixed page height)
+  const flipbookHtml = html.replace('</head>', `
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: white;
+      }
+      .content-wrapper {
+        padding: 40px;
+        box-sizing: border-box;
+      }
+      /* Ensure we have a way to split pages if needed, 
+         but for a simple flipbook from notes, 
+         we'll treat the whole thing as a sequence of pages 
+         based on viewport height */
+    </style>
+  </head>`);
+
+  let browser;
+  try {
+    const isVercel = process.env.VERCEL || process.env.VERCEL_URL;
+
+    browser = await puppeteer.launch({
+      args: isVercel ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox'],
+      defaultViewport: chromium.defaultViewport,
+      executablePath: isVercel ? await chromium.executablePath() : null,
+      headless: isVercel ? chromium.headless : 'new',
+    });
+
+    const page = await browser.newPage();
+    
+    // Set viewport to A4 aspect ratio (roughly)
+    // A4 is 210x297mm. At 96 DPI, that's ~794x1123px
+    const width = 800;
+    const height = 1131;
+    await page.setViewport({ width, height });
+
+    await page.setContent(flipbookHtml, { waitUntil: 'networkidle0' });
+    await page.evaluateHandle('document.fonts.ready');
+
+    // Calculate total height to determine number of pages
+    const totalHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+    const pageCount = Math.ceil(totalHeight / height);
+    
+    const pages = [];
+    for (let i = 0; i < pageCount; i++) {
+      const screenshot = await page.screenshot({
+        type: 'jpeg',
+        quality: 90,
+        clip: {
+          x: 0,
+          y: i * height,
+          width,
+          height
+        },
+        encoding: 'base64'
+      });
+      pages.push(`data:image/jpeg;base64,${screenshot}`);
+    }
+
+    return pages;
+  } catch (error) {
+    console.error('Flipbook generation error:', error);
+    throw error;
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
+  }
+}
+
+module.exports = { generateFlipbookPages };
