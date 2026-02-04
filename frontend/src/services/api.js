@@ -11,21 +11,30 @@ const api = axios.create({
 api.interceptors.response.use(
   (res) => res,
   (error) => {
-    // Extract the best possible error message
-    const message = error.response?.data?.error || 
-                    error.response?.data?.message || 
-                    error.message || 
-                    'An unexpected error occurred';
+    let message = 'An unexpected error occurred';
     
-    // Create a clean error object that just contains the message string
-    const cleanError = new Error(message);
-    
-    // For network errors, provide a more user-friendly message
-    if (error.message === 'Network Error' || !error.response) {
-      cleanError.message = 'Server not reachable. Please check your connection.';
+    if (error.response) {
+      // Server responded with a status code outside the 2xx range
+      const data = error.response.data;
+      if (typeof data === 'string') {
+        message = data;
+      } else if (data && typeof data === 'object') {
+        message = data.error || data.message || data.details || JSON.stringify(data);
+      }
+    } else if (error.request) {
+      // Request was made but no response was received
+      message = 'Server not reachable. Please check your connection.';
+    } else {
+      // Something happened in setting up the request
+      message = error.message;
     }
     
-    return Promise.reject(cleanError);
+    // Ensure we don't return "[object Object]"
+    if (typeof message === 'object') {
+      message = JSON.stringify(message);
+    }
+    
+    return Promise.reject(new Error(message));
   }
 );
 

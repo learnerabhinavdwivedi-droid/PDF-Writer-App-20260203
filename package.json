@@ -5,11 +5,34 @@
   "scripts": {
     "build": "cd frontend && npm install && npm run build",
     "vercel-build": "cd frontend && npm install && npm run build",
-    "start": "cd backend && npm start",
-    "dev": "cd backend && npm run dev"
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js"
   },
-  "workspaces": [
-    "backend",
-    "frontend"
-  ]
+  "dependencies": {
+    "@sparticuz/chromium": "^123.0.1",
+    "@tiptap/extension-color": "^2.11.3",
+    "@tiptap/extension-font-family": "^2.11.3",
+    "@tiptap/extension-highlight": "^2.11.3",
+    "@tiptap/extension-subscript": "^2.11.3",
+    "@tiptap/extension-superscript": "^2.11.3",
+    "@tiptap/extension-text-align": "^2.11.3",
+    "@tiptap/extension-text-style": "^2.11.3",
+    "@tiptap/extension-underline": "^2.11.3",
+    "@tiptap/html": "^2.11.3",
+    "@tiptap/pm": "^2.11.3",
+    "@tiptap/starter-kit": "^2.11.3",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "handlebars": "^4.7.8",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^8.0.0",
+    "puppeteer-core": "^24.36.1",
+    "react-pageflip": "^2.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
 }

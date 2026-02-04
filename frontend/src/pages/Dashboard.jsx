@@ -17,7 +17,7 @@ function Dashboard() {
       setDocuments(response.data.documents || response.data || []);
       setError('');
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to fetch documents');
+      setError(err.message || 'Failed to fetch documents');
       console.error(err);
     } finally {
       setLoading(false);
@@ -30,7 +30,7 @@ function Dashboard() {
         await documentAPI.deleteDocument(id);
         setDocuments(documents.filter(doc => doc._id !== id));
       } catch (err) {
-        setError(err.response?.data?.error || 'Failed to delete document');
+        setError(err.message || 'Failed to delete document');
       }
     }
   };
@@ -41,7 +41,7 @@ function Dashboard() {
       const doc = res.data.document || res.data;
       alert(`Title: ${doc.title}\n\n${doc.content}`);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to view document');
+      setError(err.message || 'Failed to view document');
     }
   };
 
@@ -57,7 +57,7 @@ function Dashboard() {
       const updated = updateRes.data.document || updateRes.data;
       setDocuments(docs => docs.map(d => d._id === id ? updated : d));
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to edit document');
+      setError(err.message || 'Failed to edit document');
     }
   };
 

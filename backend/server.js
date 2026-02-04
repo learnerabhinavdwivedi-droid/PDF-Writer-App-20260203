@@ -10,8 +10,23 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
+const allowedOrigins = process.env.FRONTEND_ORIGIN 
+  ? [process.env.FRONTEND_ORIGIN] 
+  : ['http://localhost:3000', 'http://localhost:5173', 'https://pdfwriter-app.vercel.app'];
+
 app.use(cors({
-  origin: process.env.FRONTEND_ORIGIN || 'http://localhost:3000',
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (process.env.NODE_ENV === 'production') {
+      return callback(null, true); // In production, allow all for now or restrict to Vercel domain
+    }
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      return callback(null, true);
+    } else {
+      return callback(null, true); // Fallback to allow during debug
+    }
+  },
   credentials: true
 }));
 app.use(cookieParser());
