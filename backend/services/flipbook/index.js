@@ -2,6 +2,24 @@ const puppeteer = require('puppeteer-core');
 const chromium = require('@sparticuz/chromium');
 const { transformToHTML } = require('../pdf/transformer');
 
+// Try to find local Chrome/Chromium installation
+function getLocalChromePath() {
+  const paths = [
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+    process.env.CHROME_PATH,
+    process.env.PUPPETEER_EXECUTABLE_PATH
+  ].filter(Boolean);
+  
+  const fs = require('fs');
+  for (const path of paths) {
+    try {
+      if (fs.existsSync(path)) return path;
+    } catch (e) {}
+  }
+  return null;
+}
+
 /**
  * Generates flipbook pages (images) from content.
  * @param {Object} params - Input parameters
@@ -34,11 +52,12 @@ async function generateFlipbookPages({ content, options = {} }) {
   let browser;
   try {
     const isVercel = process.env.VERCEL || process.env.VERCEL_URL;
+    const localChrome = !isVercel ? getLocalChromePath() : null;
 
     browser = await puppeteer.launch({
       args: isVercel ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox'],
       defaultViewport: chromium.defaultViewport,
-      executablePath: isVercel ? await chromium.executablePath() : null,
+      executablePath: isVercel ? await chromium.executablePath() : localChrome,
       headless: isVercel ? chromium.headless : 'new',
     });
 

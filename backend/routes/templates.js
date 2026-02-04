@@ -1,29 +1,24 @@
 const express = require('express');
 const router = express.Router();
-let Template;
-const memoryTemplates = [];
-try {
-  Template = require('../models/Template');
-} catch (_) {
-  Template = null;
-}
+const Template = require('../models/Template');
 
 // Create template
 router.post('/', async (req, res) => {
   try {
-    const { name, description, content, category, isPublic } = req.body;
+    const { name, description, content, category, isPublic, author } = req.body;
 
     if (!name || !content) {
       return res.status(400).json({ error: 'Name and content are required' });
     }
 
-    if (!Template) {
-      const template = { _id: String(Date.now()), name, description, content, category, isPublic: !!isPublic };
-      memoryTemplates.push(template);
-      return res.status(201).json({ success: true, message: 'Template created (in-memory)', template });
-    }
-
-    const template = new Template({ name, description, content, category, isPublic });
+    const template = new Template({ 
+      name, 
+      description, 
+      content, 
+      category, 
+      isPublic: !!isPublic,
+      author: author || '65c123456789012345678901'
+    });
     await template.save();
 
     res.status(201).json({
@@ -40,7 +35,7 @@ router.post('/', async (req, res) => {
 // Get all public templates
 router.get('/', async (req, res) => {
   try {
-    const templates = Template ? await Template.find({ isPublic: true }) : memoryTemplates;
+    const templates = await Template.find({ isPublic: true });
 
     res.status(200).json({
       success: true,
@@ -56,9 +51,7 @@ router.get('/', async (req, res) => {
 // Get template by ID
 router.get('/:id', async (req, res) => {
   try {
-    const template = Template
-      ? await Template.findById(req.params.id)
-      : memoryTemplates.find(t => t._id === req.params.id);
+    const template = await Template.findById(req.params.id);
 
     if (!template) {
       return res.status(404).json({ error: 'Template not found' });
@@ -77,21 +70,11 @@ router.get('/:id', async (req, res) => {
 // Update template
 router.put('/:id', async (req, res) => {
   try {
-    const { name, description, content, category, isPublic } = req.body;
-
-    let template;
-    if (!Template) {
-      const idx = memoryTemplates.findIndex(t => t._id === req.params.id);
-      if (idx === -1) return res.status(404).json({ error: 'Template not found' });
-      memoryTemplates[idx] = { ...memoryTemplates[idx], name, description, content, category, isPublic, updatedAt: new Date() };
-      template = memoryTemplates[idx];
-    } else {
-      template = await Template.findByIdAndUpdate(
-        req.params.id,
-        { name, description, content, category, isPublic, updatedAt: new Date() },
-        { new: true, runValidators: true }
-      );
-    }
+    const template = await Template.findByIdAndUpdate(
+      req.params.id,
+      { ...req.body, updatedAt: new Date() },
+      { new: true, runValidators: true }
+    );
 
     if (!template) {
       return res.status(404).json({ error: 'Template not found' });
@@ -111,14 +94,7 @@ router.put('/:id', async (req, res) => {
 // Delete template
 router.delete('/:id', async (req, res) => {
   try {
-    let template;
-    if (!Template) {
-      const idx = memoryTemplates.findIndex(t => t._id === req.params.id);
-      if (idx === -1) return res.status(404).json({ error: 'Template not found' });
-      template = memoryTemplates.splice(idx, 1)[0];
-    } else {
-      template = await Template.findByIdAndDelete(req.params.id);
-    }
+    const template = await Template.findByIdAndDelete(req.params.id);
 
     if (!template) {
       return res.status(404).json({ error: 'Template not found' });
@@ -126,8 +102,7 @@ router.delete('/:id', async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Template deleted successfully',
-      template
+      message: 'Template deleted successfully'
     });
 
   } catch (error) {
@@ -136,3 +111,4 @@ router.delete('/:id', async (req, res) => {
 });
 
 module.exports = router;
+

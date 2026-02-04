@@ -7,6 +7,7 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
+    "@sparticuz/chromium": "^123.0.1",
     "@tiptap/extension-color": "^2.11.3",
     "@tiptap/extension-font-family": "^2.11.3",
     "@tiptap/extension-highlight": "^2.11.3",
@@ -26,8 +27,7 @@
     "handlebars": "^4.7.8",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.0.0",
-    "puppeteer-core": "^24.1.1",
-    "@sparticuz/chromium": "^123.0.1",
+    "puppeteer-core": "^24.36.1",
     "react-pageflip": "^2.0.3"
   },
   "devDependencies": {
