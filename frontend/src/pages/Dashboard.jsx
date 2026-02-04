@@ -7,6 +7,7 @@ function Dashboard() {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,6 +21,7 @@ function Dashboard() {
       setError('');
     } catch (err) {
       setError(err.message || 'Failed to fetch documents');
+      setMessage('');
       console.error(err);
     } finally {
       setLoading(false);
@@ -31,8 +33,11 @@ function Dashboard() {
       try {
         await documentAPI.deleteDocument(id);
         setDocuments(documents.filter(doc => doc._id !== id));
+        setMessage('Document deleted successfully!');
+        setError('');
       } catch (err) {
         setError(err.message || 'Failed to delete document');
+        setMessage('');
       }
     }
   };
@@ -46,6 +51,7 @@ function Dashboard() {
       }
     } catch (err) {
       setError(err.message || 'Failed to view document');
+      setMessage('');
     }
   };
 
@@ -60,8 +66,11 @@ function Dashboard() {
       const updateRes = await documentAPI.updateDocument(id, { title: newTitle, content: newContent });
       const updated = updateRes.data.document || updateRes.data;
       setDocuments(docs => docs.map(d => d._id === id ? updated : d));
+      setMessage('Document updated successfully!');
+      setError('');
     } catch (err) {
       setError(err.message || 'Failed to edit document');
+      setMessage('');
     }
   };
 
@@ -73,6 +82,7 @@ function Dashboard() {
       </div>
 
       {error && <div className="error-message">{error}</div>}
+      {message && <div className="message">{message}</div>}
 
       {loading ? (
         <div className="loading">Loading documents...</div>

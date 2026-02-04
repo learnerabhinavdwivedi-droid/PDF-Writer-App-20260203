@@ -8,6 +8,7 @@ function Editor() {
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
   const contentRef = useRef(null);
   const navigate = useNavigate();
 
@@ -33,14 +34,16 @@ function Editor() {
 
       setMessage('PDF downloaded successfully!');
     } catch (error) {
-      setMessage('Error generating PDF: ' + error.message);
+      setError('Error generating PDF: ' + error.message);
+      setMessage('');
     }
     setLoading(false);
   };
 
   const handleSaveDocument = async () => {
     if (!title || !content) {
-      setMessage('Please fill in all fields');
+      setError('Please fill in all fields');
+      setMessage('');
       return;
     }
 
@@ -53,10 +56,12 @@ function Editor() {
       });
 
       setMessage('Document saved successfully!');
+      setError('');
       setTitle('');
       setContent('');
     } catch (error) {
-      setMessage('Error saving document: ' + error.message);
+      setError('Error saving document: ' + error.message);
+      setMessage('');
     }
     setLoading(false);
   };
@@ -66,7 +71,8 @@ function Editor() {
       const res = await templateAPI.getAllTemplates();
       const templates = res.data.templates || [];
       if (templates.length === 0) {
-        setMessage('No templates available');
+        setError('No templates available');
+        setMessage('');
         return;
       }
       const names = templates.map(t => t.name).join(', ');
@@ -75,14 +81,17 @@ function Editor() {
       setTitle(selected.name);
       setContent(selected.content || selected.description || selected.name || '');
       setMessage(selected.description ? `Template loaded: ${selected.description}` : 'Template loaded');
+      setError('');
     } catch (err) {
-      setMessage('Error loading templates: ' + err.message);
+      setError('Error loading templates: ' + err.message);
+      setMessage('');
     }
   };
 
   const handleConvert = async () => {
     if (!title || !content) {
-      setMessage('Please fill in all fields');
+      setError('Please fill in all fields');
+      setMessage('');
       return;
     }
     setLoading(true);
@@ -99,8 +108,10 @@ function Editor() {
       link.parentNode && link.parentNode.removeChild(link);
       setTimeout(() => window.URL.revokeObjectURL(url), 5000);
       setMessage('Converted PDF downloaded successfully!');
+      setError('');
     } catch (error) {
-      setMessage('Error converting: ' + error.message);
+      setError('Error converting: ' + error.message);
+      setMessage('');
     }
     setLoading(false);
   };
@@ -149,6 +160,7 @@ function Editor() {
       </div>
 
       {message && <div className="message">{message}</div>}
+      {error && <div className="error-message">{error}</div>}
 
       <div className="editor-container">
         <div className="editor-form">

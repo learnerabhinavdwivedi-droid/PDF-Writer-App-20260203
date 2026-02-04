@@ -11,6 +11,7 @@ function Auth() {
     password: ''
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
@@ -33,13 +34,15 @@ function Auth() {
         : await authAPI.register(formData);
 
       setMessage(`${isLogin ? 'Login' : 'Registration'} successful! ${response.data.message}`);
+      setError('');
       if (response.data.user) {
         localStorage.setItem('user', JSON.stringify(response.data.user));
         navigate('/dashboard');
       }
       setFormData({ name: '', email: '', password: '' });
     } catch (error) {
-      setMessage('Error: ' + error.message);
+      setError('Error: ' + error.message);
+      setMessage('');
     }
     setLoading(false);
   };
@@ -50,8 +53,13 @@ function Auth() {
         <div className="auth-box">
           <h2>{isLogin ? 'Login' : 'Register'}</h2>
           
+          {error && (
+            <div className="auth-message error">
+              {error}
+            </div>
+          )}
           {message && (
-            <div className={`auth-message ${message.includes('Error') ? 'error' : 'success'}`}>
+            <div className="auth-message success">
               {message}
             </div>
           )}

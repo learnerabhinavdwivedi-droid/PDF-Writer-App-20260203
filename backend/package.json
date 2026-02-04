@@ -29,7 +29,8 @@
     "mongoose": "^8.0.0",
     "multer": "^2.0.2",
     "puppeteer-core": "^24.36.1",
-    "react-pageflip": "^2.0.3"
+    "react-pageflip": "^2.0.3",
+    "react-router-dom": "^7.13.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
