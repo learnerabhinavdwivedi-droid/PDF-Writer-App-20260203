@@ -18,8 +18,11 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// API routes (frontend expects /api)
+// API routes
+// On Vercel, the /api prefix might be stripped depending on the routing
 app.use('/api', apiRoutes);
+app.use('/', apiRoutes); // Fallback for serverless environments
+
 
 // Centralized error handler
 app.use((err, req, res, next) => {
@@ -36,6 +39,11 @@ mongoose.connect(MONGODB_URI)
   .then(() => console.log('MongoDB connected'))
   .catch((err) => console.warn('MongoDB connection failed:', err.message));
 
-app.listen(PORT, () => {
-  console.log(`Backend running on http://localhost:${PORT}`);
-});
+// Handle app.listen for local development
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Backend running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;

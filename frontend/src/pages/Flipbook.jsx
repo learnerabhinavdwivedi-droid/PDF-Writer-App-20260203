@@ -39,7 +39,7 @@ function Flipbook() {
           setError('Failed to generate flipbook pages');
         }
       } catch (err) {
-        setError('Error generating flipbook: ' + (err.response?.data?.error || err.message));
+        setError('Error generating flipbook: ' + err.message);
       } finally {
         setLoading(false);
       }

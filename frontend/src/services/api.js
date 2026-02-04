@@ -11,10 +11,21 @@ const api = axios.create({
 api.interceptors.response.use(
   (res) => res,
   (error) => {
+    // Extract the best possible error message
+    const message = error.response?.data?.error || 
+                    error.response?.data?.message || 
+                    error.message || 
+                    'An unexpected error occurred';
+    
+    // Create a clean error object that just contains the message string
+    const cleanError = new Error(message);
+    
+    // For network errors, provide a more user-friendly message
     if (error.message === 'Network Error' || !error.response) {
-      return Promise.reject({ response: { data: { error: 'Server not reachable' } } });
+      cleanError.message = 'Server not reachable. Please check your connection.';
     }
-    return Promise.reject(error);
+    
+    return Promise.reject(cleanError);
   }
 );
 

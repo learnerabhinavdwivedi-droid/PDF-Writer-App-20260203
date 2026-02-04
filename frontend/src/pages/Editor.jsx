@@ -33,7 +33,7 @@ function Editor() {
 
       setMessage('PDF downloaded successfully!');
     } catch (error) {
-      setMessage('Error generating PDF: ' + (error.response?.data?.error || error.message));
+      setMessage('Error generating PDF: ' + error.message);
     }
     setLoading(false);
   };
@@ -56,7 +56,7 @@ function Editor() {
       setTitle('');
       setContent('');
     } catch (error) {
-      setMessage('Error saving document: ' + (error.response?.data?.error || error.message));
+      setMessage('Error saving document: ' + error.message);
     }
     setLoading(false);
   };
@@ -76,7 +76,7 @@ function Editor() {
       setContent(selected.content || selected.description || selected.name || '');
       setMessage(selected.description ? `Template loaded: ${selected.description}` : 'Template loaded');
     } catch (err) {
-      setMessage('Error loading templates: ' + (err.response?.data?.error || err.message));
+      setMessage('Error loading templates: ' + err.message);
     }
   };
 
@@ -100,7 +100,7 @@ function Editor() {
       setTimeout(() => window.URL.revokeObjectURL(url), 5000);
       setMessage('Converted PDF downloaded successfully!');
     } catch (error) {
-      setMessage('Error converting: ' + (error.response?.data?.error || error.message));
+      setMessage('Error converting: ' + error.message);
     }
     setLoading(false);
   };

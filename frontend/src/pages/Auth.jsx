@@ -39,7 +39,7 @@ function Auth() {
       }
       setFormData({ name: '', email: '', password: '' });
     } catch (error) {
-      setMessage('Error: ' + (error.response?.data?.error || error.message));
+      setMessage('Error: ' + error.message);
     }
     setLoading(false);
   };
