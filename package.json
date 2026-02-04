@@ -1,8 +1,0 @@
-{
-  "name": "pdfwriter-root",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "vercel-build": "cd frontend && npm install && npm run build"
-  }
-}
