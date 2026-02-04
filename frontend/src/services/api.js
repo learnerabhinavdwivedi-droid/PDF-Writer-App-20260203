@@ -70,7 +70,10 @@ export const convertAPI = {
 };
 
 export const flipbookAPI = {
-  generateFlipbook: (payload) => api.post('/flipbook/view', payload)
+  generateFlipbook: (payload) => api.post('/flipbook/view', payload),
+  uploadPDF: (formData) => api.post('/flipbook/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
 };
 
 // Template APIs

@@ -17,13 +17,15 @@ const Page = React.forwardRef((props, ref) => {
 function Flipbook() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { content, title, options } = location.state || {};
+  const { content, title, options, pages: preloadedPages } = location.state || {};
   
-  const [pages, setPages] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [pages, setPages] = useState(preloadedPages || []);
+  const [loading, setLoading] = useState(!preloadedPages);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (preloadedPages) return; // Already have pages from upload
+
     if (!content) {
       setError('No content provided for flipbook');
       setLoading(false);

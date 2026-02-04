@@ -113,6 +113,32 @@ function Editor() {
     navigate('/flipbook', { state: { title, content } });
   };
 
+  const handleUploadPDFForFlipbook = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setLoading(true);
+    setMessage('Processing PDF... this may take a moment.');
+    
+    try {
+      const formData = new FormData();
+      formData.append('pdf', file);
+      
+      const response = await flipbookAPI.uploadPDF(formData);
+      if (response.data.success) {
+        navigate('/flipbook', { 
+          state: { 
+            title: file.name.replace('.pdf', ''), 
+            pages: response.data.pages 
+          } 
+        });
+      }
+    } catch (error) {
+      setMessage('Error processing PDF: ' + error.message);
+    }
+    setLoading(false);
+  };
+
   // Content is plain text; no formatting helpers
 
   return (
@@ -179,6 +205,19 @@ function Editor() {
             >
               📖 View as Flipbook
             </button>
+            
+            <div className="upload-btn-wrapper">
+              <button className="btn btn-upload" disabled={loading}>
+                📤 Upload PDF to Flipbook
+              </button>
+              <input 
+                type="file" 
+                accept="application/pdf" 
+                onChange={handleUploadPDFForFlipbook}
+                disabled={loading}
+              />
+            </div>
+
             <button
               onClick={handleUseTemplate}
               disabled={loading}

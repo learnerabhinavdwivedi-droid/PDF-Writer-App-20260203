@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { documentAPI } from '../services/api';
 import './Dashboard.css';
 
@@ -6,6 +7,7 @@ function Dashboard() {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchDocuments();
@@ -39,7 +41,9 @@ function Dashboard() {
     try {
       const res = await documentAPI.getDocumentById(id);
       const doc = res.data.document || res.data;
-      alert(`Title: ${doc.title}\n\n${doc.content}`);
+      if (window.confirm(`Title: ${doc.title}\n\nView this as a Flipbook?`)) {
+        navigate('/flipbook', { state: { title: doc.title, content: doc.content } });
+      }
     } catch (err) {
       setError(err.message || 'Failed to view document');
     }
