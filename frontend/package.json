@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite --port 3000",
     "build": "vite build",
-    "preview": "vite preview --port 3000"
+    "preview": "vite preview --port 3000",
+    "vercel-build": "vite build"
   },
   "dependencies": {
     "axios": "^1.13.4",
